@@ -22,11 +22,13 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 # ========== Your executable ==========
 add_executable(wxWTutorial ${WXWTUTORIAL_SOURCES})
 
-add_custom_command(TARGET wxWTutorial POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_CURRENT_BINARY_DIR}/extern/wxWidgets/lib/gcc_x64_dll
-    $<TARGET_FILE_DIR:wxWTutorial>
-)
+if(WIN32)
+    add_custom_command(TARGET wxWTutorial POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_BINARY_DIR}/extern/wxWidgets/lib/gcc_x64_dll
+        $<TARGET_FILE_DIR:wxWTutorial>
+    )
+endif()
 
 target_link_libraries(wxWTutorial PRIVATE
     wx::core
