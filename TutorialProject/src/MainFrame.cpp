@@ -2,7 +2,8 @@
 #include <wx/wx.h>
 //#include <wx/spinctrl.h>
 
-enum IDs {
+/*
+enum IDs { //(old way of doing events (static), more in MainFrame.h)
     // Custom ID - Rules
     // 1. Must be positive
     // 2. Cannot be 0 or 1
@@ -11,23 +12,47 @@ enum IDs {
     SLIDER_ID = 3,
     TEXT_ID = 4
 };
+*/
 
+/* //(old way of doing events (static), more in MainFrame.h)
 wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_BUTTON(BUTTON_ID, MainFrame::OnButtonClicked)
     EVT_SLIDER(SLIDER_ID, MainFrame::OnSliderChanged)
     EVT_TEXT(TEXT_ID, MainFrame::OnTextChanged)
 wxEND_EVENT_TABLE()
-
+*/
 
 MainFrame::MainFrame(const wxString& title): wxFrame(nullptr, wxID_ANY, title){
     
     wxPanel* panel = new wxPanel(this);
     
+    wxButton* button1 = new wxButton(panel, wxID_ANY, "Button 1", wxPoint(300, 275), wxSize(200, 50));
+    wxButton* button2 = new wxButton(panel, wxID_ANY, "Button 2", wxPoint(300, 350), wxSize(200, 50));
+    this->Bind(wxEVT_CLOSE_WINDOW, &MainFrame::OnClose, this);
+    this->Bind(wxEVT_BUTTON, &MainFrame::OnAnyButtonClicked, this);
+    button1->Bind(wxEVT_BUTTON, &MainFrame::OnButton1Clicked, this);
+    button2->Bind(wxEVT_BUTTON, &MainFrame::OnButton2Clicked, this);
+
+
+    // ---Dynamic Events---
+    //wxButton* button = new wxButton(panel, wxID_ANY, "Button", wxPoint(300, 275), wxSize(200, 50));
+    //wxSlider* slider = new wxSlider(panel, wxID_ANY, 0, 0, 100, wxPoint(300, 200), wxSize(200, -1));
+    //wxTextCtrl* text = new wxTextCtrl(panel, wxID_ANY, "", wxPoint(300, 375), wxSize(200, -1));
+
+    //button->Bind(wxEVT_BUTTON, &MainFrame::OnButtonClicked, this); // find out the event tag(first param) in the documentation
+    //slider->Bind(wxEVT_SLIDER, &MainFrame::OnSliderChanged, this);
+    //text->Bind(wxEVT_TEXT, &MainFrame::OnTextChanged, this);
+
+    //button->Unbind(wxEVT_BUTTON, &MainFrame::OnButtonClicked, this); // remove an event from an object
+
+    //CreateStatusBar();
+
+    /* //(old way of doing events (static), more in MainFrame.h)
     wxButton* button = new wxButton(panel, BUTTON_ID, "Button", wxPoint(300, 275), wxSize(200, 50));
     wxSlider* slider = new wxSlider(panel, SLIDER_ID, 0, 0, 100, wxPoint(300, 200), wxSize(200, -1));
     wxTextCtrl* text = new wxTextCtrl(panel, TEXT_ID, "", wxPoint(300, 375), wxSize(200, -1));
-    
-    CreateStatusBar();
+    */
+    //CreateStatusBar();
     
     
     
@@ -63,8 +88,18 @@ MainFrame::MainFrame(const wxString& title): wxFrame(nullptr, wxID_ANY, title){
     */
 }
 
-void MainFrame::OnButtonClicked(wxCommandEvent& evt){
-    wxLogStatus("Button Clicked");
+void MainFrame::OnAnyButtonClicked(wxCommandEvent& evt){ // Event propagation - if a child of na object(for example a button of a Frame) is clicked, it looks for an event handler. If it doesn't have one, it checks for the event handler in it's parent. If there are multiple buttons, it will call the same event for all of them.
+    wxLogMessage("Button Clicked");
+}
+
+void MainFrame::OnButton1Clicked(wxCommandEvent& evt){
+    wxLogMessage("Button 1 clicked");
+    evt.Skip(); // This tells propagation that it should continue(so if a parent has an event handler, it will not stop trying to call events added to the parent of the object that triggered this event, it will go up the chain and call the next event from it's parents)
+}
+
+void MainFrame::OnButton2Clicked(wxCommandEvent& evt){
+    wxLogMessage("Button 2 clicked");
+    evt.Skip();
 }
 
 void MainFrame::OnSliderChanged(wxCommandEvent& evt){
@@ -75,4 +110,9 @@ void MainFrame::OnSliderChanged(wxCommandEvent& evt){
 void MainFrame::OnTextChanged(wxCommandEvent& evt){
     wxString str = wxString::Format("Text: %s", evt.GetString());
     wxLogStatus(str);
+}
+
+void MainFrame::OnClose(wxCloseEvent& evt){
+    wxLogMessage("Frame Closed");
+    evt.Skip();
 }
