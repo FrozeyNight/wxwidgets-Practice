@@ -11,5 +11,6 @@ private:
     void OnSliderChanged(wxCommandEvent& evt);
     void OnTextChanged(wxCommandEvent& evt);
     void OnClose(wxCloseEvent& evt);
+    void OnMouseEvent(wxMouseEvent& evt);
     // wxDECLARE_EVENT_TABLE(); <- static event handling (the old way to do events (static))
 };

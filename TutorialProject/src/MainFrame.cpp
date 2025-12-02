@@ -25,13 +25,24 @@ wxEND_EVENT_TABLE()
 MainFrame::MainFrame(const wxString& title): wxFrame(nullptr, wxID_ANY, title){
     
     wxPanel* panel = new wxPanel(this);
-    
+    wxButton* button = new wxButton(panel, wxID_ANY, "Button", wxPoint(300, 250), wxSize(200, 100));
+    button->Bind(wxEVT_MOTION, &MainFrame::OnMouseEvent, this); // since the wxMouseEvent doesn't propagate, if you want to know the position of the mouse even while hovering over controls, you need to add the wxMouseEvent to them.
+    panel->Bind(wxEVT_MOTION, &MainFrame::OnMouseEvent, this);
+
+    CreateStatusBar();
+    // If a control flickers, store it in a local variable and enable double buffering. That should fix the issue
+    //wxStatusBar* statusBar = new wxStatusBar();
+    //statusBar->SetDoubleBuffered(true);
+
+    // ---Event Propagation---
+    /*
     wxButton* button1 = new wxButton(panel, wxID_ANY, "Button 1", wxPoint(300, 275), wxSize(200, 50));
     wxButton* button2 = new wxButton(panel, wxID_ANY, "Button 2", wxPoint(300, 350), wxSize(200, 50));
     this->Bind(wxEVT_CLOSE_WINDOW, &MainFrame::OnClose, this);
     this->Bind(wxEVT_BUTTON, &MainFrame::OnAnyButtonClicked, this);
     button1->Bind(wxEVT_BUTTON, &MainFrame::OnButton1Clicked, this);
     button2->Bind(wxEVT_BUTTON, &MainFrame::OnButton2Clicked, this);
+    */
 
 
     // ---Dynamic Events---
@@ -115,4 +126,13 @@ void MainFrame::OnTextChanged(wxCommandEvent& evt){
 void MainFrame::OnClose(wxCloseEvent& evt){
     wxLogMessage("Frame Closed");
     evt.Skip();
+}
+
+void MainFrame::OnMouseEvent(wxMouseEvent& evt){
+    wxPoint mousePos = evt.GetPosition(); // This shows client position (so for example the position relative to the origin point of the button (the origin point of most objects in wxWidgets is by default the top left corner))
+    //wxPoint mousePos = wxGetMousePosition(); // This shows screen position (so where the mouse is on the screen)
+    //mousePos = this->ScreenToClient(mousePos); This converts the screen position to the clinet position 
+    //mousePos = this->ClientToScreen(mousePos); This converts the clinet position to the screen position 
+    wxString message = wxString::Format("Mouse Event Detected! (x=%d y=%d)", mousePos.x, mousePos.y);
+    wxLogStatus(message);
 }
