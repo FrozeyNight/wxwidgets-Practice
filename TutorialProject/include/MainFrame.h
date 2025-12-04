@@ -12,5 +12,6 @@ private:
     void OnTextChanged(wxCommandEvent& evt);
     void OnClose(wxCloseEvent& evt);
     void OnMouseEvent(wxMouseEvent& evt);
+    void OnKeyEvent(wxKeyEvent& evt);
     // wxDECLARE_EVENT_TABLE(); <- static event handling (the old way to do events (static))
 };

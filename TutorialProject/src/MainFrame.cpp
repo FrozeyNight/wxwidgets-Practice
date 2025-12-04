@@ -24,12 +24,20 @@ wxEND_EVENT_TABLE()
 
 MainFrame::MainFrame(const wxString& title): wxFrame(nullptr, wxID_ANY, title){
     
-    wxPanel* panel = new wxPanel(this);
+    wxPanel* panel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS); // wxWANTS_CHARS + wxEVT_CHAR_HOOK allows for global registering of keystrokes, which is clunky to do any other way, since other solutions will only accept keystrokes if the control in focus has the event, since it doesn't propagate
+    wxButton* btn1 = new wxButton(panel, wxID_ANY, "Button 1", wxPoint(300, 150), wxSize(200, 100));
+    wxButton* btn2 = new wxButton(panel, wxID_ANY, "Button 2", wxPoint(300, 350), wxSize(200, 100));
+    panel->Bind(wxEVT_CHAR_HOOK, &MainFrame::OnKeyEvent, this); // There is also wxEVT_CHAR that's good for combinations such as shift+letter, since _KEY_DOWN will show them as separate 
+    
+    CreateStatusBar();
+
+    // ---Mouse Events---
+    /*
     wxButton* button = new wxButton(panel, wxID_ANY, "Button", wxPoint(300, 250), wxSize(200, 100));
     button->Bind(wxEVT_MOTION, &MainFrame::OnMouseEvent, this); // since the wxMouseEvent doesn't propagate, if you want to know the position of the mouse even while hovering over controls, you need to add the wxMouseEvent to them.
     panel->Bind(wxEVT_MOTION, &MainFrame::OnMouseEvent, this);
+    CreateStatusBar();*/
 
-    CreateStatusBar();
     // If a control flickers, store it in a local variable and enable double buffering. That should fix the issue
     //wxStatusBar* statusBar = new wxStatusBar();
     //statusBar->SetDoubleBuffered(true);
@@ -135,4 +143,26 @@ void MainFrame::OnMouseEvent(wxMouseEvent& evt){
     //mousePos = this->ClientToScreen(mousePos); This converts the clinet position to the screen position 
     wxString message = wxString::Format("Mouse Event Detected! (x=%d y=%d)", mousePos.x, mousePos.y);
     wxLogStatus(message);
+}
+
+void MainFrame::OnKeyEvent(wxKeyEvent& evt){
+    // This is how you detect specific keys
+    if(evt.GetUnicodeKey() == 'A'){
+        wxLogStatus("A was pressed!");
+        return;
+    }
+    else if(evt.GetKeyCode() == WXK_HOME){
+        wxLogStatus("HOME was pressed!");
+        return;
+    }
+
+    wxChar keyChar = evt.GetUnicodeKey(); // Shows basic keys like 'A' or '2', but not something like home or alt. If the user presess that, it returns WXK_NONE
+
+    if(keyChar == WXK_NONE){ // Displays the code for certain keys for example alt, home, insert
+        int keyCode = evt.GetKeyCode();
+        wxLogStatus("Key Event %d", keyCode);
+    }
+    else{
+        wxLogStatus("Key Event %c", keyChar);
+    }
 }
