@@ -13,5 +13,7 @@ private:
     void OnClose(wxCloseEvent& evt);
     void OnMouseEvent(wxMouseEvent& evt);
     void OnKeyEvent(wxKeyEvent& evt);
+    void OnAddButtonClicked(wxCommandEvent& evt);
+    void OnClearButtonClicked(wxCommandEvent& evt);
     // wxDECLARE_EVENT_TABLE(); <- static event handling (the old way to do events (static))
 };

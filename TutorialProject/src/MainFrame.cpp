@@ -24,12 +24,32 @@ wxEND_EVENT_TABLE()
 
 MainFrame::MainFrame(const wxString& title): wxFrame(nullptr, wxID_ANY, title){
     
+    wxPanel* panel = new wxPanel(this);
+    wxStaticText* titleText = new wxStaticText(panel, wxID_ANY, "To-Do List", wxPoint(325, 24), wxSize(200, 100));
+    wxFont font = titleText->GetFont();
+    font.SetPointSize(22);
+    font.SetWeight(wxFONTWEIGHT_BOLD);
+    titleText->SetFont(font);
+    wxTextCtrl* userInput = new wxTextCtrl(panel, wxID_ANY, "", wxPoint(100, 80), wxSize(510, -1));
+    wxButton* addButton = new wxButton(panel, wxID_ANY, "Add", wxPoint(615, 80), wxSize(-1, 28));
+    wxArrayString items;
+    items.Add("test 1");
+    items.Add("test 2");
+
+    wxCheckListBox* checkListBox = new wxCheckListBox(panel, wxID_ANY, wxPoint(100, 115), wxSize(600, 420), items, wxLB_MULTIPLE);
+    wxButton* clearButton = new wxButton(panel, wxID_ANY, "Clear", wxPoint(100, 540), wxSize(-1, 28));
+
+    addButton->Bind(wxEVT_BUTTON, &MainFrame::OnAddButtonClicked, this);
+
+    // ---Keyboard Events---
+    /*
     wxPanel* panel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS); // wxWANTS_CHARS + wxEVT_CHAR_HOOK allows for global registering of keystrokes, which is clunky to do any other way, since other solutions will only accept keystrokes if the control in focus has the event, since it doesn't propagate
     wxButton* btn1 = new wxButton(panel, wxID_ANY, "Button 1", wxPoint(300, 150), wxSize(200, 100));
     wxButton* btn2 = new wxButton(panel, wxID_ANY, "Button 2", wxPoint(300, 350), wxSize(200, 100));
     panel->Bind(wxEVT_CHAR_HOOK, &MainFrame::OnKeyEvent, this); // There is also wxEVT_CHAR that's good for combinations such as shift+letter, since _KEY_DOWN will show them as separate 
     
     CreateStatusBar();
+    */
 
     // ---Mouse Events---
     /*
@@ -165,4 +185,36 @@ void MainFrame::OnKeyEvent(wxKeyEvent& evt){
     else{
         wxLogStatus("Key Event %c", keyChar);
     }
+}
+
+void MainFrame::OnAddButtonClicked(wxCommandEvent& evt){
+    wxWindow* window = (wxWindow*)evt.GetEventObject();
+    window = window->GetParent();
+    for (wxWindowList::iterator i = window->GetChildren().begin(); i != window->GetChildren().end(); i++)
+    {
+        wxCheckListBox* checkBoxList = dynamic_cast<wxCheckListBox *>(*i);
+        if(checkBoxList){
+            for (wxWindowList::iterator j = window->GetChildren().begin(); j != window->GetChildren().end(); j++)
+            {
+                wxTextCtrl* inputText = dynamic_cast<wxTextCtrl *>(*i);
+                if(inputText){
+                    checkBoxList->Append(inputText->GetValue());
+                    return;
+                }
+            }
+        }
+    }
+
+    for (wxWindowList::iterator i = window->GetChildren().begin(); i != window->GetChildren().end(); i++)
+    {
+        wxTextCtrl* inputText = dynamic_cast<wxTextCtrl *>(*i);
+        if(inputText){
+
+        }
+    }
+    
+}
+
+void MainFrame::OnClearButtonClicked(wxCommandEvent& evt){
+    
 }
