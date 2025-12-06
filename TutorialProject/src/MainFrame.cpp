@@ -40,6 +40,7 @@ MainFrame::MainFrame(const wxString& title): wxFrame(nullptr, wxID_ANY, title){
     wxButton* clearButton = new wxButton(panel, wxID_ANY, "Clear", wxPoint(100, 540), wxSize(-1, 28));
 
     addButton->Bind(wxEVT_BUTTON, &MainFrame::OnAddButtonClicked, this);
+    clearButton->Bind(wxEVT_BUTTON, &MainFrame::OnClearButtonClicked, this);
 
     // ---Keyboard Events---
     /*
@@ -193,28 +194,36 @@ void MainFrame::OnAddButtonClicked(wxCommandEvent& evt){
     for (wxWindowList::iterator i = window->GetChildren().begin(); i != window->GetChildren().end(); i++)
     {
         wxCheckListBox* checkBoxList = dynamic_cast<wxCheckListBox *>(*i);
-        if(checkBoxList){
+        if(checkBoxList && checkBoxList->GetName() == "listBox"){
             for (wxWindowList::iterator j = window->GetChildren().begin(); j != window->GetChildren().end(); j++)
             {
-                wxTextCtrl* inputText = dynamic_cast<wxTextCtrl *>(*i);
-                if(inputText){
+                wxTextCtrl* inputText = dynamic_cast<wxTextCtrl *>(*j);
+                if(inputText && inputText->GetName() == "text" && inputText->GetValue() != ""){
                     checkBoxList->Append(inputText->GetValue());
+                    inputText->SetValue("");
                     return;
                 }
             }
         }
     }
-
-    for (wxWindowList::iterator i = window->GetChildren().begin(); i != window->GetChildren().end(); i++)
-    {
-        wxTextCtrl* inputText = dynamic_cast<wxTextCtrl *>(*i);
-        if(inputText){
-
-        }
-    }
-    
 }
 
 void MainFrame::OnClearButtonClicked(wxCommandEvent& evt){
-    
+    wxWindow* window = (wxWindow*)evt.GetEventObject();
+    window = window->GetParent();
+    for (wxWindowList::iterator i = window->GetChildren().begin(); i != window->GetChildren().end(); i++)
+    {
+        wxCheckListBox* checkBoxList = dynamic_cast<wxCheckListBox *>(*i);
+        if(checkBoxList && checkBoxList->GetName() == "listBox"){
+            int itemsCount = checkBoxList->GetCount();
+            for (int j = itemsCount - 1; j >= 0; j--)
+            {
+                if(checkBoxList->IsChecked(j)){
+                    checkBoxList->Delete(j);
+                }
+            }
+            
+        }
+            
+    }
 }
