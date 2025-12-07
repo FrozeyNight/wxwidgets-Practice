@@ -30,17 +30,21 @@ MainFrame::MainFrame(const wxString& title): wxFrame(nullptr, wxID_ANY, title){
     font.SetPointSize(22);
     font.SetWeight(wxFONTWEIGHT_BOLD);
     titleText->SetFont(font);
-    wxTextCtrl* userInput = new wxTextCtrl(panel, wxID_ANY, "", wxPoint(100, 80), wxSize(510, -1));
+    wxTextCtrl* userInput = new wxTextCtrl(panel, wxID_ANY, "", wxPoint(100, 80), wxSize(510, -1), wxTE_PROCESS_ENTER);
     wxButton* addButton = new wxButton(panel, wxID_ANY, "Add", wxPoint(615, 80), wxSize(-1, 28));
     wxArrayString items;
+
     items.Add("test 1");
     items.Add("test 2");
 
     wxCheckListBox* checkListBox = new wxCheckListBox(panel, wxID_ANY, wxPoint(100, 115), wxSize(600, 420), items, wxLB_MULTIPLE);
     wxButton* clearButton = new wxButton(panel, wxID_ANY, "Clear", wxPoint(100, 540), wxSize(-1, 28));
 
+
     addButton->Bind(wxEVT_BUTTON, &MainFrame::OnAddButtonClicked, this);
     clearButton->Bind(wxEVT_BUTTON, &MainFrame::OnClearButtonClicked, this);
+    userInput->Bind(wxEVT_TEXT_ENTER, &MainFrame::OnEnterKeyEvent, this);
+    checkListBox->Bind(wxEVT_KEY_DOWN, &MainFrame::OnDeleteKeyEvent, this);
 
     // ---Keyboard Events---
     /*
@@ -208,6 +212,49 @@ void MainFrame::OnAddButtonClicked(wxCommandEvent& evt){
     }
 }
 
+void MainFrame::OnEnterKeyEvent(wxCommandEvent& evt){
+    wxWindow* window = (wxWindow*)evt.GetEventObject();
+    window = window->GetParent();
+    for (wxWindowList::iterator i = window->GetChildren().begin(); i != window->GetChildren().end(); i++)
+    {
+        wxCheckListBox* checkBoxList = dynamic_cast<wxCheckListBox *>(*i);
+        if(checkBoxList && checkBoxList->GetName() == "listBox"){
+            for (wxWindowList::iterator j = window->GetChildren().begin(); j != window->GetChildren().end(); j++)
+            {
+                wxTextCtrl* inputText = dynamic_cast<wxTextCtrl *>(*j);
+                if(inputText && inputText->GetName() == "text" && inputText->GetValue() != ""){
+                    checkBoxList->Append(inputText->GetValue());
+                    inputText->SetValue("");
+                    return;
+                }
+            }
+        }
+    }
+}
+
+void MainFrame::OnDeleteKeyEvent(wxKeyEvent& evt){
+    if(evt.GetUnicodeKey() == WXK_DELETE){
+        wxWindow* window = (wxWindow*)evt.GetEventObject();
+        window = window->GetParent();
+        for (wxWindowList::iterator i = window->GetChildren().begin(); i != window->GetChildren().end(); i++)
+        {
+            wxCheckListBox* checkBoxList = dynamic_cast<wxCheckListBox *>(*i);
+            if(checkBoxList && checkBoxList->GetName() == "listBox"){
+                int itemsCount = checkBoxList->GetCount();
+                for (int j = itemsCount - 1; j >= 0; j--)
+                {
+                    //Make it so it deletes the selected ones, not the checked ones
+                    if(checkBoxList->IsChecked(j)){
+                        checkBoxList->Delete(j);
+                    }
+                }
+                
+            }
+                
+        }
+    }
+}
+
 void MainFrame::OnClearButtonClicked(wxCommandEvent& evt){
     wxWindow* window = (wxWindow*)evt.GetEventObject();
     window = window->GetParent();
@@ -218,9 +265,8 @@ void MainFrame::OnClearButtonClicked(wxCommandEvent& evt){
             int itemsCount = checkBoxList->GetCount();
             for (int j = itemsCount - 1; j >= 0; j--)
             {
-                if(checkBoxList->IsChecked(j)){
-                    checkBoxList->Delete(j);
-                }
+                //Add a confirm box
+                checkBoxList->Delete(j);
             }
             
         }
