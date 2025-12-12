@@ -16,6 +16,6 @@ private:
     void OnAddButtonClicked(wxCommandEvent& evt);
     void OnClearButtonClicked(wxCommandEvent& evt);
     void OnEnterKeyEvent(wxCommandEvent& evt);
-    void OnDeleteKeyEvent(wxKeyEvent& evt);
+    void OnCheckListBoxKeyEvent(wxKeyEvent& evt);
     // wxDECLARE_EVENT_TABLE(); <- static event handling (the old way to do events (static))
 };

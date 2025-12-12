@@ -34,9 +34,6 @@ MainFrame::MainFrame(const wxString& title): wxFrame(nullptr, wxID_ANY, title){
     wxButton* addButton = new wxButton(panel, wxID_ANY, "Add", wxPoint(615, 80), wxSize(-1, 28));
     wxArrayString items;
 
-    items.Add("test 1");
-    items.Add("test 2");
-
     wxCheckListBox* checkListBox = new wxCheckListBox(panel, wxID_ANY, wxPoint(100, 115), wxSize(600, 420), items, wxLB_MULTIPLE);
     wxButton* clearButton = new wxButton(panel, wxID_ANY, "Clear", wxPoint(100, 540), wxSize(-1, 28));
 
@@ -44,7 +41,7 @@ MainFrame::MainFrame(const wxString& title): wxFrame(nullptr, wxID_ANY, title){
     addButton->Bind(wxEVT_BUTTON, &MainFrame::OnAddButtonClicked, this);
     clearButton->Bind(wxEVT_BUTTON, &MainFrame::OnClearButtonClicked, this);
     userInput->Bind(wxEVT_TEXT_ENTER, &MainFrame::OnEnterKeyEvent, this);
-    checkListBox->Bind(wxEVT_KEY_DOWN, &MainFrame::OnDeleteKeyEvent, this);
+    checkListBox->Bind(wxEVT_KEY_DOWN, &MainFrame::OnCheckListBoxKeyEvent, this);
 
     // ---Keyboard Events---
     /*
@@ -232,8 +229,9 @@ void MainFrame::OnEnterKeyEvent(wxCommandEvent& evt){
     }
 }
 
-void MainFrame::OnDeleteKeyEvent(wxKeyEvent& evt){
-    if(evt.GetUnicodeKey() == WXK_DELETE){
+void MainFrame::OnCheckListBoxKeyEvent(wxKeyEvent& evt){
+    int pressedKey = evt.GetKeyCode();
+    if(pressedKey == WXK_DELETE || pressedKey == WXK_UP || pressedKey == WXK_DOWN){
         wxWindow* window = (wxWindow*)evt.GetEventObject();
         window = window->GetParent();
         for (wxWindowList::iterator i = window->GetChildren().begin(); i != window->GetChildren().end(); i++)
@@ -241,11 +239,27 @@ void MainFrame::OnDeleteKeyEvent(wxKeyEvent& evt){
             wxCheckListBox* checkBoxList = dynamic_cast<wxCheckListBox *>(*i);
             if(checkBoxList && checkBoxList->GetName() == "listBox"){
                 int itemsCount = checkBoxList->GetCount();
-                for (int j = itemsCount - 1; j >= 0; j--)
+                for (int j = 0; j < itemsCount; j++)
                 {
-                    //Make it so it deletes the selected ones, not the checked ones
-                    if(checkBoxList->IsChecked(j)){
-                        checkBoxList->Delete(j);
+                    if(checkBoxList->IsSelected(j)){
+                        if(pressedKey == WXK_DELETE){
+                            checkBoxList->Delete(j);
+                            checkBoxList->DeselectAll();
+                            break;
+                        }
+                        /* try setting the clientobject data when adding things to it
+                        else if(pressedKey == WXK_UP){
+                            checkBoxList->SetClientObject(j)
+                            //wxCheckBox* holder = (wxCheckBox*)checkBoxList->GetClientObject(j - 1);
+                            //checkBoxList->Delete(j - 1);
+                            //checkBoxList->Insert(holder->GetName(), j);
+                        }
+                        else{
+                            wxCheckBox* holder = (wxCheckBox*)checkBoxList->GetClientObject(j + 1);
+                            checkBoxList->Delete(j + 1);
+                            checkBoxList->Insert(holder->GetName(), j);
+                        }
+                        */
                     }
                 }
                 
@@ -263,10 +277,13 @@ void MainFrame::OnClearButtonClicked(wxCommandEvent& evt){
         wxCheckListBox* checkBoxList = dynamic_cast<wxCheckListBox *>(*i);
         if(checkBoxList && checkBoxList->GetName() == "listBox"){
             int itemsCount = checkBoxList->GetCount();
-            for (int j = itemsCount - 1; j >= 0; j--)
-            {
-                //Add a confirm box
-                checkBoxList->Delete(j);
+            wxMessageDialog* popUpMessage = new wxMessageDialog(window, "Are you sure you want to clear all tasks?", "Clear", wxYES_NO | wxCANCEL);
+            int userChoice = popUpMessage->ShowModal();
+            if(userChoice == wxID_YES){
+                for (int j = itemsCount - 1; j >= 0; j--)
+                {
+                    checkBoxList->Delete(j);
+                }
             }
             
         }
