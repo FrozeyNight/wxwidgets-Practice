@@ -247,19 +247,38 @@ void MainFrame::OnCheckListBoxKeyEvent(wxKeyEvent& evt){
                             checkBoxList->DeselectAll();
                             break;
                         }
-                        /* try setting the clientobject data when adding things to it
-                        else if(pressedKey == WXK_UP){
-                            checkBoxList->SetClientObject(j)
-                            //wxCheckBox* holder = (wxCheckBox*)checkBoxList->GetClientObject(j - 1);
-                            //checkBoxList->Delete(j - 1);
-                            //checkBoxList->Insert(holder->GetName(), j);
+                        else if(pressedKey == WXK_UP && j > 0){
+                            wxString nameHolder = checkBoxList->GetString(j - 1);
+                            checkBoxList->SetString(j - 1, checkBoxList->GetString(j));
+                            checkBoxList->SetString(j, nameHolder);
+                            if(checkBoxList->IsChecked(j) && !checkBoxList->IsChecked(j-1)){
+                                checkBoxList->Check(j - 1);
+                                checkBoxList->Check(j, false);
+                            }
+                            else if(!checkBoxList->IsChecked(j) && checkBoxList->IsChecked(j-1)){
+                                checkBoxList->Check(j - 1, false);
+                                checkBoxList->Check(j);
+                            }
+                            checkBoxList->Deselect(j);
+                            checkBoxList->Select(j - 1);
+                            break;
                         }
-                        else{
-                            wxCheckBox* holder = (wxCheckBox*)checkBoxList->GetClientObject(j + 1);
-                            checkBoxList->Delete(j + 1);
-                            checkBoxList->Insert(holder->GetName(), j);
+                        else if(pressedKey == WXK_DOWN && j < itemsCount - 1){
+                            wxString nameHolder = checkBoxList->GetString(j + 1);
+                            checkBoxList->SetString(j + 1, checkBoxList->GetString(j));
+                            checkBoxList->SetString(j, nameHolder);
+                            if(checkBoxList->IsChecked(j) && !checkBoxList->IsChecked(j+1)){
+                                checkBoxList->Check(j + 1);
+                                checkBoxList->Check(j, false);
+                            }
+                            else if(!checkBoxList->IsChecked(j) && checkBoxList->IsChecked(j+1)){
+                                checkBoxList->Check(j + 1, false);
+                                checkBoxList->Check(j);
+                            }
+                            checkBoxList->Deselect(j);
+                            checkBoxList->Select(j + 1);
+                            break;
                         }
-                        */
                     }
                 }
                 
