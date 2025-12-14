@@ -1,5 +1,6 @@
 #include "MainFrame.h"
 #include <wx/wx.h>
+#include <wx/textfile.h>
 //#include <wx/spinctrl.h>
 
 /*
@@ -42,6 +43,34 @@ MainFrame::MainFrame(const wxString& title): wxFrame(nullptr, wxID_ANY, title){
     clearButton->Bind(wxEVT_BUTTON, &MainFrame::OnClearButtonClicked, this);
     userInput->Bind(wxEVT_TEXT_ENTER, &MainFrame::OnEnterKeyEvent, this);
     checkListBox->Bind(wxEVT_KEY_DOWN, &MainFrame::OnCheckListBoxKeyEvent, this);
+
+    wxTextFile* tasksData = new wxTextFile("PathToFile");
+    if(tasksData->Exists()){
+        
+        tasksData->Open();
+
+        wxString lineHolder = "";
+        size_t separatorIndex = 0;
+        for (size_t i = 0; i < tasksData->GetLineCount(); i++)
+        {
+            lineHolder = tasksData->GetLine(i);
+            separatorIndex = lineHolder.find_first_of(";");
+            checkListBox->Append(lineHolder.Mid(0, separatorIndex));
+            lineHolder = lineHolder.Mid(separatorIndex + 1, 2);
+
+            if(lineHolder[0] == '1'){
+                checkListBox->Check(i);
+            }
+            if(lineHolder[1] == '1'){
+                checkListBox->Select(i);
+            }
+        }
+
+        tasksData->Close();
+    }
+    else{
+        wxLogWarning("Failed to find TasksData.txt");
+    }
 
     // ---Keyboard Events---
     /*
