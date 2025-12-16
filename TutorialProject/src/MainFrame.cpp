@@ -43,8 +43,9 @@ MainFrame::MainFrame(const wxString& title): wxFrame(nullptr, wxID_ANY, title){
     clearButton->Bind(wxEVT_BUTTON, &MainFrame::OnClearButtonClicked, this);
     userInput->Bind(wxEVT_TEXT_ENTER, &MainFrame::OnEnterKeyEvent, this);
     checkListBox->Bind(wxEVT_KEY_DOWN, &MainFrame::OnCheckListBoxKeyEvent, this);
+    this->Bind(wxEVT_CLOSE_WINDOW, &MainFrame::OnClose, this);
 
-    wxTextFile* tasksData = new wxTextFile("PathToFile");
+    wxTextFile* tasksData = new wxTextFile("TutorialProject/src/TasksData.txt");
     if(tasksData->Exists()){
         
         tasksData->Open();
@@ -182,10 +183,12 @@ void MainFrame::OnTextChanged(wxCommandEvent& evt){
     wxLogStatus(str);
 }
 
+/*
 void MainFrame::OnClose(wxCloseEvent& evt){
     wxLogMessage("Frame Closed");
     evt.Skip();
 }
+*/
 
 void MainFrame::OnMouseEvent(wxMouseEvent& evt){
     wxPoint mousePos = evt.GetPosition(); // This shows client position (so for example the position relative to the origin point of the button (the origin point of most objects in wxWidgets is by default the top left corner))
@@ -337,4 +340,49 @@ void MainFrame::OnClearButtonClicked(wxCommandEvent& evt){
         }
             
     }
+}
+
+void MainFrame::OnClose(wxCloseEvent& evt){
+    if(evt.CanVeto()){
+        wxWindow* window = (wxWindow*)evt.GetEventObject();
+        wxMessageDialog* popUpMessage = new wxMessageDialog(window, "Do you want to save?", "Save", wxYES_NO | wxCANCEL);
+        int userChoice = popUpMessage->ShowModal();
+        if(userChoice == wxID_YES){
+            wxWindowList::iterator iterator = window->GetChildren().begin();
+            window = dynamic_cast<wxPanel *>(*iterator);
+            for (wxWindowList::iterator i = window->GetChildren().begin(); i != window->GetChildren().end(); i++)
+            {
+                wxCheckListBox* checkBoxList = dynamic_cast<wxCheckListBox *>(*i);
+                if(checkBoxList && checkBoxList->GetName() == "listBox"){
+                    int itemsCount = checkBoxList->GetCount();
+                    wxTextFile* tasksData = new wxTextFile("TutorialProject/src/TasksData.txt");
+                    if(tasksData->Exists()){
+                        
+                        tasksData->Open();
+                        tasksData->Clear();
+                        
+                        for (int j = 0; j < itemsCount; j++)
+                        {
+                            wxString taskDataHolder = checkBoxList->GetString(j) + ';' + wxString::Format("%d%d", checkBoxList->IsChecked(j), checkBoxList->IsSelected(j));
+                            tasksData->AddLine(taskDataHolder);
+                        }
+
+                        tasksData->Write();
+                        tasksData->Close();
+                    }
+                    else{
+                        wxLogWarning("Failed to find TasksData.txt");
+                    }
+                    
+                }
+                    
+            }
+        }
+        else if(userChoice == wxID_CANCEL){
+            evt.Veto();
+            return;
+        }
+    }
+
+    Destroy();
 }

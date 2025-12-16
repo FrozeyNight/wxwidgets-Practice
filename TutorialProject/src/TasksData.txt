@@ -1,6 +1,6 @@
-test1;11
+test1;00
 test2;00
 test3;10
-test4;01
-test5;00
-test6;11
+test4;00
+5;10
+6;01
