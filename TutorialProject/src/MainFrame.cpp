@@ -23,6 +23,8 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
 wxEND_EVENT_TABLE()
 */
 
+void MoveTasks(wxCheckListBox* checkBoxList, int index, int direction);
+
 MainFrame::MainFrame(const wxString& title): wxFrame(nullptr, wxID_ANY, title){
     
     wxPanel* panel = new wxPanel(this);
@@ -242,23 +244,7 @@ void MainFrame::OnAddButtonClicked(wxCommandEvent& evt){
 }
 
 void MainFrame::OnEnterKeyEvent(wxCommandEvent& evt){
-    wxWindow* window = (wxWindow*)evt.GetEventObject();
-    window = window->GetParent();
-    for (wxWindowList::iterator i = window->GetChildren().begin(); i != window->GetChildren().end(); i++)
-    {
-        wxCheckListBox* checkBoxList = dynamic_cast<wxCheckListBox *>(*i);
-        if(checkBoxList && checkBoxList->GetName() == "listBox"){
-            for (wxWindowList::iterator j = window->GetChildren().begin(); j != window->GetChildren().end(); j++)
-            {
-                wxTextCtrl* inputText = dynamic_cast<wxTextCtrl *>(*j);
-                if(inputText && inputText->GetName() == "text" && inputText->GetValue() != ""){
-                    checkBoxList->Append(inputText->GetValue());
-                    inputText->SetValue("");
-                    return;
-                }
-            }
-        }
-    }
+    OnAddButtonClicked(evt);
 }
 
 void MainFrame::OnCheckListBoxKeyEvent(wxKeyEvent& evt){
@@ -280,35 +266,11 @@ void MainFrame::OnCheckListBoxKeyEvent(wxKeyEvent& evt){
                             break;
                         }
                         else if(pressedKey == WXK_UP && j > 0){
-                            wxString nameHolder = checkBoxList->GetString(j - 1);
-                            checkBoxList->SetString(j - 1, checkBoxList->GetString(j));
-                            checkBoxList->SetString(j, nameHolder);
-                            if(checkBoxList->IsChecked(j) && !checkBoxList->IsChecked(j-1)){
-                                checkBoxList->Check(j - 1);
-                                checkBoxList->Check(j, false);
-                            }
-                            else if(!checkBoxList->IsChecked(j) && checkBoxList->IsChecked(j-1)){
-                                checkBoxList->Check(j - 1, false);
-                                checkBoxList->Check(j);
-                            }
-                            checkBoxList->Deselect(j);
-                            checkBoxList->Select(j - 1);
+                            MoveTasks(checkBoxList, j, 1);
                             break;
                         }
                         else if(pressedKey == WXK_DOWN && j < itemsCount - 1){
-                            wxString nameHolder = checkBoxList->GetString(j + 1);
-                            checkBoxList->SetString(j + 1, checkBoxList->GetString(j));
-                            checkBoxList->SetString(j, nameHolder);
-                            if(checkBoxList->IsChecked(j) && !checkBoxList->IsChecked(j+1)){
-                                checkBoxList->Check(j + 1);
-                                checkBoxList->Check(j, false);
-                            }
-                            else if(!checkBoxList->IsChecked(j) && checkBoxList->IsChecked(j+1)){
-                                checkBoxList->Check(j + 1, false);
-                                checkBoxList->Check(j);
-                            }
-                            checkBoxList->Deselect(j);
-                            checkBoxList->Select(j + 1);
+                            MoveTasks(checkBoxList, j, -1);
                             break;
                         }
                     }
@@ -385,4 +347,20 @@ void MainFrame::OnClose(wxCloseEvent& evt){
     }
 
     Destroy();
+}
+
+void MoveTasks(wxCheckListBox* checkBoxList, int index, int direction){
+    wxString nameHolder = checkBoxList->GetString(index - direction);
+    checkBoxList->SetString(index - direction, checkBoxList->GetString(index));
+    checkBoxList->SetString(index, nameHolder);
+    if(checkBoxList->IsChecked(index) && !checkBoxList->IsChecked(index-direction)){
+        checkBoxList->Check(index - direction);
+        checkBoxList->Check(index, false);
+    }
+    else if(!checkBoxList->IsChecked(index) && checkBoxList->IsChecked(index-direction)){
+        checkBoxList->Check(index - direction, false);
+        checkBoxList->Check(index);
+    }
+    checkBoxList->Deselect(index);
+    checkBoxList->Select(index - direction);
 }
