@@ -1,6 +1,7 @@
 #include "MainFrame.h"
 #include <wx/wx.h>
 #include <wx/textfile.h>
+#include <wx/stdpaths.h>
 //#include <wx/spinctrl.h>
 
 /*
@@ -24,6 +25,7 @@ wxEND_EVENT_TABLE()
 */
 
 void MoveTasks(wxCheckListBox* checkBoxList, int index, int direction);
+wxString GetUserSavedTasksPath();
 
 MainFrame::MainFrame(const wxString& title): wxFrame(nullptr, wxID_ANY, title){
     
@@ -47,7 +49,9 @@ MainFrame::MainFrame(const wxString& title): wxFrame(nullptr, wxID_ANY, title){
     checkListBox->Bind(wxEVT_KEY_DOWN, &MainFrame::OnCheckListBoxKeyEvent, this);
     this->Bind(wxEVT_CLOSE_WINDOW, &MainFrame::OnClose, this);
 
-    wxTextFile* tasksData = new wxTextFile("TutorialProject/src/TasksData.txt");
+    wxString savedTasksPath = GetUserSavedTasksPath();
+
+    wxTextFile* tasksData = new wxTextFile(savedTasksPath);
     if(tasksData->Exists()){
         
         tasksData->Open();
@@ -317,7 +321,10 @@ void MainFrame::OnClose(wxCloseEvent& evt){
                 wxCheckListBox* checkBoxList = dynamic_cast<wxCheckListBox *>(*i);
                 if(checkBoxList && checkBoxList->GetName() == "listBox"){
                     int itemsCount = checkBoxList->GetCount();
-                    wxTextFile* tasksData = new wxTextFile("TutorialProject/src/TasksData.txt");
+                    
+                    wxString savedTasksPath = GetUserSavedTasksPath();
+
+                    wxTextFile* tasksData = new wxTextFile(savedTasksPath);
                     if(tasksData->Exists()){
                         
                         tasksData->Open();
@@ -363,4 +370,17 @@ void MoveTasks(wxCheckListBox* checkBoxList, int index, int direction){
     }
     checkBoxList->Deselect(index);
     checkBoxList->Select(index - direction);
+}
+
+wxString GetUserSavedTasksPath(){
+    wxString savedTasksPath;
+
+    if(wxGetOsDescription().StartsWith("Windows")){
+        savedTasksPath = wxStandardPaths::Get().GetExecutablePath();
+        const int offset = 25;
+        savedTasksPath.erase(savedTasksPath.Len() - offset);
+        savedTasksPath.Replace("\\", "/", true);
+    }
+
+    return savedTasksPath += "TutorialProject/src/TasksData.txt";
 }
