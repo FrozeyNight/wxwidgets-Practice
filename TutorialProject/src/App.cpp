@@ -7,7 +7,8 @@ wxIMPLEMENT_APP(App); // very important - This determines the main of this proje
 // Crtl + Shift + B here to build
 bool App::OnInit(){
     MainFrame* mainFrame = new MainFrame("C++ GUI");
-    mainFrame->SetClientSize(800, 600); // This sets the window (not including the title bar and it's border) to 800x600. If you set this in the constructor instead, it would make the whole window 800x600.
+    //mainFrame->SetClientSize(800, 600); // This sets the window (not including the title bar and it's border) to 800x600. If you set this in the constructor instead, it would make the whole window 800x600.
+    mainFrame->SetClientSize(1000, 600); // For Sizers
     mainFrame->Center();
     mainFrame->Show(); // the window is hidden by default, you need to use this to show it 
     return true;

@@ -27,8 +27,46 @@ wxEND_EVENT_TABLE()
 void MoveTasks(wxCheckListBox* checkBoxList, int index, int direction);
 wxString GetUserSavedTasksPath();
 
-MainFrame::MainFrame(const wxString& title): wxFrame(nullptr, wxID_ANY, title){
+MainFrame::MainFrame(const wxString& title)
+    : wxFrame(nullptr, wxID_ANY, title){
+    // This makes the window impossible to resize
+    //: wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxMAXIMIZE_BOX)){
     
+    wxPanel* panel = new wxPanel(this);
+
+    wxButton* button1 = new wxButton(panel, wxID_ANY, "Button 1", wxDefaultPosition, wxSize(300,100));
+    wxButton* button2 = new wxButton(panel, wxID_ANY, "Button 2", wxDefaultPosition, wxSize(300,100));
+
+    wxBoxSizer* boxSizer = new wxBoxSizer(wxHORIZONTAL);
+    //wxSizerFlags flags = wxSizerFlags().Proportion(1).CenterVertical().Border(wxALL, 25);
+
+    // Add parameters:
+    // proportion - stretch to fill all available space in a proportion (so if 2 buttons have proportions 1 and 3, the first one will fill 25% and the other 75% of all available space)
+    // flags - give the added control properties like: align it to the bottom, expand it in the opposite way of the sizer's orientations
+    //boxSizer->Add(button1, 1, wxSHAPED); - the old way adding properties
+    //boxSizer->Add(button1, wxSizerFlags().Proportion(1).CenterVertical().Border(wxALL, 25));
+    //boxSizer->Add(button1, flags);
+    //boxSizer->Add(button2, flags);
+
+    boxSizer->Add(button1);
+    //boxSizer->AddSpacer(20); // <- adds a 20px space between the button1 and button2
+    boxSizer->AddStretchSpacer(); // <- adds a spacer that fills all available space
+    boxSizer->Add(button2);
+
+    panel->SetSizer(boxSizer);
+    boxSizer->SetSizeHints(this);
+
+    /* --- ADAPTIVE LAYOUTS (manual = bad)
+    SetClientSize(1000, 600);
+    
+    wxPanel* panel = new wxPanel(this);
+    button = new wxButton(panel, wxID_ANY, "Centered Button", wxPoint(375,250), wxSize(250, 100));
+
+    Bind(wxEVT_SIZE, &MainFrame::OnResize, this);
+    */
+    
+    
+    /* --- EXERCISE: TO-DO LIST PROGRAM ---
     wxPanel* panel = new wxPanel(this);
     wxStaticText* titleText = new wxStaticText(panel, wxID_ANY, "To-Do List", wxPoint(325, 24), wxSize(200, 100));
     wxFont font = titleText->GetFont();
@@ -78,6 +116,8 @@ MainFrame::MainFrame(const wxString& title): wxFrame(nullptr, wxID_ANY, title){
     else{
         wxLogWarning("Failed to find TasksData.txt");
     }
+
+    */
 
     // ---Keyboard Events---
     /*
@@ -227,6 +267,7 @@ void MainFrame::OnKeyEvent(wxKeyEvent& evt){
     }
 }
 
+/* --- EXERCISE: TO-DO LIST PROGRAM ---
 void MainFrame::OnAddButtonClicked(wxCommandEvent& evt){
     wxWindow* window = (wxWindow*)evt.GetEventObject();
     window = window->GetParent();
@@ -383,4 +424,19 @@ wxString GetUserSavedTasksPath(){
     }
 
     return savedTasksPath += "TutorialProject/src/TasksData.txt";
+}
+
+*/
+
+void MainFrame::OnResize(wxSizeEvent& evt){
+    wxSize clientSize = GetClientSize();
+
+    wxSize buttonSize(clientSize.GetWidth() * 0.25, 100);
+    int buttonX = (clientSize.GetWidth() - buttonSize.GetWidth()) / 2;
+    int buttonY = (clientSize.GetHeight() - buttonSize.GetHeight()) / 2;
+
+    button->SetSize(buttonSize);
+    button->SetPosition(wxPoint(buttonX, buttonY));
+
+    evt.Skip();
 }
